@@ -1,6 +1,7 @@
 package com.calebe.springweb.controller;
 
 import com.calebe.springweb.configuration.Config;
+import com.calebe.springweb.service.AddressDeleter;
 import com.calebe.springweb.service.AddressRetriever;
 import com.calebe.springweb.service.AddressStorer;
 import org.junit.Before;
@@ -22,8 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -45,6 +45,11 @@ public class AddressBookTest {
         @Bean
         public AddressStorer store() {//When called it will return a put from the HashMap
             return addresses::put;
+        }
+
+        @Bean
+        public AddressDeleter delete() {
+            return addresses::remove;
         }
     }
 
@@ -95,5 +100,18 @@ public class AddressBookTest {
                 .andExpect(content().string("Maud's House"));
     }
 
+    @Test
+    public void afterAddingAnAddressItCanBeDeleted() throws Exception {
+        mockMvc.perform(post("/address/Maud").content("Maud's House").contentType("application/text"))
+                .andExpect(status().isOk());//Post it
 
+        mockMvc.perform(get("/address/Maud"))
+                .andExpect(status().isOk());//Get it
+
+        mockMvc.perform(delete("/address/Maud"))
+                .andExpect(status().isOk());//Delete it
+
+        mockMvc.perform(get("/address/Maud"))
+                .andExpect(status().isNotFound());//Now when make a get request, nothing is found
+    }
 }
