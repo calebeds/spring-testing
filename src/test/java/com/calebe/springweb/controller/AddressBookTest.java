@@ -22,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -86,7 +87,13 @@ public class AddressBookTest {
 
     @Test
     public void afterAddingAddressItCanbeFound() throws Exception {
-        mockMvc.perform(post("/address/Maud").content("Maud's House"))
+        mockMvc.perform(post("/address/Maud").content("Maud's House").contentType("application/text"))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(get("/address/Maud"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Maud's House"));
     }
+
+
 }
